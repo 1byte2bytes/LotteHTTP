@@ -27,8 +27,8 @@ int main(void) {
     llog_trace("Facil.io listen");
     http_listen("3000", NULL, .on_request = on_request, .log = 1);
     llog_trace("Facil.io run");
-    fio_start(.threads = 1);
     llog_info("LotteHTTP started, listening to port 3000!");
+    fio_start(.threads = 1);
 
     llog_trace("Closing Lua state");
     lua_close(L);
