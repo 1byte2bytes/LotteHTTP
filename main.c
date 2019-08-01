@@ -80,11 +80,12 @@ void on_request(http_s *request) {
     // Close the Lua interpreter session
     lua_close(L);
 
-    // Get the size of our result
+    // Get the size of our body result
     int end = 0;
     int resultlen = 0;
     while (end == 0) { if (result[resultlen] == '\0') {end = 1;} else {resultlen++;} }
 
+    // Get the size of our mime result
     end = 0;
     int mimelen = 0;
     while (end == 0) { if (mime[mimelen] == '\0') {end = 1;} else {mimelen++;} }
