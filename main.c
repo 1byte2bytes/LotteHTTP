@@ -39,51 +39,59 @@
 // Define a handy function to get the size of a static string
 #define strsizeof(str) (sizeof(str) - 1)
 
-char* concat(const char *s1, const char *s2)
-{
-    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
-    // in real code you would check for errors in malloc here
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
+// TODO: there's a memory leak somewhere, probably
 void on_request(http_s *request) {
     // Generate the path to the Lua file to handle our request
+    llog_trace("Check path");
     char* path = fiobj_obj2cstr(request->path).data;
-    char *luaPath;
+    char luaPath[256];
+    memset(luaPath, 0, 256);
     if (strcmp(path, "/") == 0) {
-        luaPath = "pages/index.lua";
+        // sizeof is useful here because we do want to include the null
+        // character in the length
+        snprintf(luaPath, sizeof("pages/index.lua"), "pages/index.lua");
     } else {
-        luaPath = concat(concat("pages", path), ".lua");
+        // Combine "pages", path, and ".lua" to create our target path
+        // The path variable should always start with a /
+        size_t luaPathLen = strsizeof("pages") + strlen(path) + strsizeof(".lua") + 1;
+        snprintf(luaPath, luaPathLen, "%s%s%s", "pages", path, ".lua");
     }
+    llog_trace(luaPath);
 
     // Check if the Lua file does not exist
+    // TODO: Check it's a file and not a folder
+    llog_trace("Check exists");
     if (access(luaPath, F_OK) == -1) {
         http_send_error(request, 404);
         return;
     }
 
     // Initialise a Lua interpreter
+    llog_trace("Init Lua");
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
 
     // Import the file
+    llog_trace("Run file");
     luaL_dofile(L, luaPath);
 
     // Run the doPage() function
+    llog_trace("Run func");
     lua_getglobal(L, "doPage");
     lua_call(L, 0, 2);
 
     // Get the returning strings
+    llog_trace("Parse returns");
     char* mime = (char*)lua_tostring(L, -1);
     char* result = (char*)lua_tostring(L, -2);
     lua_pop(L, 2);
 
     // Close the Lua interpreter session
+    llog_trace("Cleanup Lua");
     lua_close(L);
 
     // Send result to client
+    llog_trace("Return results");
     http_set_header(request, HTTP_HEADER_CONTENT_TYPE, http_mimetype_find(mime, strlen(mime)));
     http_set_header(
         request, 
