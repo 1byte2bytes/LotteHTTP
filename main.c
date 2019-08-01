@@ -22,7 +22,7 @@ void on_request(http_s *request) {
     // Generate the path to the Lua file to handle our request
     char* path = fiobj_obj2cstr(request->path).data;
     char *luaPath;
-    if (strcmp(path, "") == 0) {
+    if (strcmp(path, "/") == 0) {
         luaPath = "pages/index.lua";
     } else {
         luaPath = concat(concat("pages", path), ".lua");
