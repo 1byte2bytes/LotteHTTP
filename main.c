@@ -43,22 +43,31 @@ void on_request(http_s *request) {
 
     // Run the doPage() function
     lua_getglobal(L, "doPage");
-    lua_call(L, 0, 1);
+    lua_call(L, 0, 2);
 
-    // Get the returning string
-    char* result = (char*)lua_tostring(L, -1);
-    lua_pop(L, 1);
+    // Get the returning strings
+    char* mime = (char*)lua_tostring(L, -1);
+    char* result = (char*)lua_tostring(L, -2);
+    lua_pop(L, 2);
 
     // Close the Lua interpreter session
     lua_close(L);
 
     // Get the size of our result
     int end = 0;
-    int i = 0;
-    while (end == 0) { if (result[i] == '\0') {end = 1;} else {i++;} }
+    int resultlen = 0;
+    while (end == 0) { if (result[resultlen] == '\0') {end = 1;} else {resultlen++;} }
+
+    end = 0;
+    int mimelen = 0;
+    while (end == 0) { if (mime[mimelen] == '\0') {end = 1;} else {mimelen++;} }
 
     // Send result to client
-    http_send_body(request, result, i);
+    FIOBJ SERVER = fiobj_str_new("server", 6);
+    FIOBJ SERVER_STR = fiobj_str_new("LotteHTTP/1.0.0", 15);
+    http_set_header(request, HTTP_HEADER_CONTENT_TYPE, http_mimetype_find(mime, mimelen));
+    http_set_header(request, SERVER, SERVER_STR);
+    http_send_body(request, result, resultlen);
 }
 
 int main(void) {
