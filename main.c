@@ -80,22 +80,12 @@ void on_request(http_s *request) {
     // Close the Lua interpreter session
     lua_close(L);
 
-    // Get the size of our body result
-    int end = 0;
-    int resultlen = 0;
-    while (end == 0) { if (result[resultlen] == '\0') {end = 1;} else {resultlen++;} }
-
-    // Get the size of our mime result
-    end = 0;
-    int mimelen = 0;
-    while (end == 0) { if (mime[mimelen] == '\0') {end = 1;} else {mimelen++;} }
-
     // Send result to client
     FIOBJ SERVER = fiobj_str_new("server", 6);
     FIOBJ SERVER_STR = fiobj_str_new("LotteHTTP/1.0.0", 15);
-    http_set_header(request, HTTP_HEADER_CONTENT_TYPE, http_mimetype_find(mime, mimelen));
+    http_set_header(request, HTTP_HEADER_CONTENT_TYPE, http_mimetype_find(mime, strlen(mime)));
     http_set_header(request, SERVER, SERVER_STR);
-    http_send_body(request, result, resultlen);
+    http_send_body(request, result, strlen(result));
 }
 
 int main(void) {
