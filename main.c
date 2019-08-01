@@ -7,7 +7,22 @@
 lua_State* L;
 
 void on_request(http_s *request) {
-    http_send_body(request, "Hello World!\r\n", 14);
+    llog_trace("Load page Lua");
+    luaL_dofile(L, "test.lua");
+
+    llog_trace("Run page doPage()");
+    lua_getglobal(L, "doPage");
+    lua_call(L, 0, 1);
+
+    llog_trace("Parse doPage() result & cleanup");
+    char* result = lua_tostring(L, -1);
+    lua_pop(L, 1);
+
+    int end = 0;
+    int i = 0;
+    while (end == 0) { if (result[i] == '\0') {end = 1;} else {i++;} }
+
+    http_send_body(request, result, i);
 }
 
 int main(void) {
@@ -19,9 +34,6 @@ int main(void) {
     llog_trace("Loading Lua libraries");
     luaL_openlibs(L);
     llog_debug("Lua is now initialised!");
-
-    llog_debug("Running test Lua file");
-    luaL_dofile(L, "test.lua");
 
     llog_debug("Starting facil.io server");
     llog_trace("Facil.io listen");
