@@ -30,7 +30,7 @@ void on_request(http_s *request) {
 
     // Check if the Lua file does not exist
     if( access( luaPath, F_OK ) == -1 ) {
-        http_send_body(request, "404 Not Found", 13);
+        http_send_error(request, 404);
         return;
     }
 
