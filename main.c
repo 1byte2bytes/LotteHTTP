@@ -39,10 +39,6 @@
 // Define a handy function to get the size of a static string
 #define strsizeof(str) (sizeof(str) - 1)
 
-// Define some constant values so we're not regenerating them each time
-FIOBJ C_HTTP_HEADER_SERVER_KEY; // server
-FIOBJ C_HTTP_HEADER_SERVER_VAL; // LotteHTTP/[ver]
-
 char* concat(const char *s1, const char *s2)
 {
     char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
@@ -89,15 +85,16 @@ void on_request(http_s *request) {
 
     // Send result to client
     http_set_header(request, HTTP_HEADER_CONTENT_TYPE, http_mimetype_find(mime, strlen(mime)));
-    http_set_header(request, C_HTTP_HEADER_SERVER_KEY, C_HTTP_HEADER_SERVER_VAL);
+    http_set_header(
+        request, 
+        fiobj_str_new("server", strsizeof("server")), 
+        fiobj_str_new("LotteHTTP/0.9.0", strsizeof("LotteHTTP/0.9.0"))
+    );
     http_send_body(request, result, strlen(result));
 }
 
 int main(void) {
     llog_info("LotteHTTP is starting up...");
-
-    C_HTTP_HEADER_SERVER_KEY = fiobj_str_new("server", strsizeof("server"));
-    C_HTTP_HEADER_SERVER_VAL = fiobj_str_new("LotteHTTP/0.9.0", strsizeof("LotteHTTP/0.9.0"));
 
     http_listen("3000", NULL, .on_request = on_request, .log = 1);
     fio_start(.threads = 1);
