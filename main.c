@@ -43,7 +43,9 @@
 void on_request(http_s *request) {
     // Generate the path to the Lua file to handle our request
     llog_trace("Check path");
+    // TODO: sanatise path (make sure it doesn't escape the pages folder, etc)
     char* path = fiobj_obj2cstr(request->path).data;
+    // TODO: check that path requested is smaller than luaPath with added parts
     char luaPath[256];
     memset(luaPath, 0, 256);
     if (strcmp(path, "/") == 0) {
@@ -93,6 +95,7 @@ void on_request(http_s *request) {
     // Send result to client
     llog_trace("Return results");
     http_set_header(request, HTTP_HEADER_CONTENT_TYPE, http_mimetype_find(mime, strlen(mime)));
+    // TODO: not run fiobj_str_new every request for a static header
     http_set_header(
         request, 
         fiobj_str_new("server", strsizeof("server")), 
