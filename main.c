@@ -40,6 +40,7 @@
 
 // Define a handy function to get the size of a static string
 #define strsizeof(str) (sizeof(str) - 1)
+#define PATH_MAX_LEN 256
 
 // TODO: there's a memory leak somewhere, probably
 void on_request(http_s *request) {
@@ -47,13 +48,13 @@ void on_request(http_s *request) {
     llog_trace("Check path");
     // TODO: sanatise path (make sure it doesn't escape the pages folder, etc)
     char* path = fiobj_obj2cstr(request->path).data;
-    // The actual max path is MAX_LENGTH-1 (256-1), since it needs to be null terminated
-    if(strlen(path) > 255) {
+    // The actual max path is MAX_LENGTH-1 (ex. 256-1), since it needs to be null terminated
+    if(strlen(path) > PATH_MAX_LEN - 1) {
         http_send_error(request, 500);
         return;
     } 
-    char luaPath[256];
-    memset(luaPath, 0, 256);
+    char luaPath[PATH_MAX_LEN];
+    memset(luaPath, 0, PATH_MAX_LEN);
     if (strcmp(path, "/") == 0) {
         // sizeof is useful here because we do want to include the null
         // character in the length
