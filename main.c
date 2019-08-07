@@ -45,7 +45,11 @@ void on_request(http_s *request) {
     llog_trace("Check path");
     // TODO: sanatise path (make sure it doesn't escape the pages folder, etc)
     char* path = fiobj_obj2cstr(request->path).data;
-    // TODO: check that path requested is smaller than luaPath with added parts
+    // The actual max path is MAX_LENGTH-1 (256-1), since it needs to be null terminated
+    if(strlen(path) > 255) {
+        http_send_error(request, 500);
+        return;
+    } 
     char luaPath[256];
     memset(luaPath, 0, 256);
     if (strcmp(path, "/") == 0) {
