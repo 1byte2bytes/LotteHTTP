@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "LotteLogs/LotteLogs.h"
 #include "Lua5.3.2/lua.h"
@@ -65,9 +67,16 @@ void on_request(http_s *request) {
     llog_trace(luaPath);
 
     // Check if the Lua file does not exist
-    // TODO: Check it's a file and not a folder
     llog_trace("Check exists");
     if (access(luaPath, F_OK) == -1) {
+        http_send_error(request, 404);
+        return;
+    }
+
+     // Check if it's actually a file, not a folder
+    struct stat path_stat;
+    stat(luaPath, &path_stat);
+    if (!S_ISREG(path_stat.st_mode)) {
         http_send_error(request, 404);
         return;
     }
