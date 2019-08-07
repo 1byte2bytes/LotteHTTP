@@ -49,21 +49,21 @@ void on_request(http_s *request) {
     // TODO: sanatise path (make sure it doesn't escape the pages folder, etc)
     char* path = fiobj_obj2cstr(request->path).data;
     // The actual max path is MAX_LENGTH-1 (ex. 256-1), since it needs to be null terminated
+    // TODO: take into account "pages" and ".lua"
     if(strlen(path) > PATH_MAX_LEN - 1) {
         http_send_error(request, 500);
         return;
-    } 
+    }
     char luaPath[PATH_MAX_LEN];
-    memset(luaPath, 0, PATH_MAX_LEN);
+    memset(luaPath, 0, sizeof(luaPath));
     if (strcmp(path, "/") == 0) {
         // sizeof is useful here because we do want to include the null
         // character in the length
-        snprintf(luaPath, sizeof("pages/index.lua"), "pages/index.lua");
+        snprintf(luaPath, sizeof(luaPath), "pages/index.lua");
     } else {
         // Combine "pages", path, and ".lua" to create our target path
         // The path variable should always start with a /
-        size_t luaPathLen = strsizeof("pages") + strlen(path) + strsizeof(".lua") + 1;
-        snprintf(luaPath, luaPathLen, "%s%s%s", "pages", path, ".lua");
+        snprintf(luaPath, sizeof(luaPath), "%s%s%s", "pages", path, ".lua");
     }
     llog_trace(luaPath);
 
