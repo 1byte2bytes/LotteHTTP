@@ -32,9 +32,9 @@
 #include <sys/stat.h>
 
 #include "LotteLogs/LotteLogs.h"
-#include "Lua5.3.2/lua.h"
-#include "Lua5.3.2/lualib.h"
-#include "Lua5.3.2/lauxlib.h"
+#include "Lua5.3.5/lua.h"
+#include "Lua5.3.5/lualib.h"
+#include "Lua5.3.5/lauxlib.h"
 #include "facil.io-0.7.1/lib/facil/http/http.h"
 #include "facil.io-0.7.1/lib/facil/fiobj/fiobject.h"
 
