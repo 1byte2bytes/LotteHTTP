@@ -35,8 +35,8 @@
 #include "Lua5.3.5/lua.h"
 #include "Lua5.3.5/lualib.h"
 #include "Lua5.3.5/lauxlib.h"
-#include "facil.io-0.7.1/lib/facil/http/http.h"
-#include "facil.io-0.7.1/lib/facil/fiobj/fiobject.h"
+#include "facil.io-0.7.3/lib/facil/http/http.h"
+#include "facil.io-0.7.3/lib/facil/fiobj/fiobject.h"
 
 // Define a handy function to get the size of a static string
 #define strsizeof(str) (sizeof(str) - 1)
