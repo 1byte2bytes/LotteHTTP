@@ -42,6 +42,9 @@
 #define strsizeof(str) (sizeof(str) - 1)
 #define PATH_MAX_LEN 256
 
+static FIOBJ HTTP_HEADER_SERVER;
+static FIOBJ HTTP_HEADER_SERVER_VALUE;
+
 // TODO: there's a memory leak somewhere, probably
 void on_request(http_s *request) {
     // Generate the path to the Lua file to handle our request
@@ -112,14 +115,17 @@ void on_request(http_s *request) {
     // TODO: not run fiobj_str_new every request for a static header
     http_set_header(
         request, 
-        fiobj_str_new("server", strsizeof("server")), 
-        fiobj_str_new("LotteHTTP/0.9.0", strsizeof("LotteHTTP/0.9.0"))
+        HTTP_HEADER_SERVER, 
+        fiobj_dup(HTTP_HEADER_SERVER_VALUE)
     );
     http_send_body(request, result, strlen(result));
 }
 
 int main(void) {
     llog_info("LotteHTTP is starting up...");
+
+    HTTP_HEADER_SERVER = fiobj_str_new("server", strsizeof("server"));
+    HTTP_HEADER_SERVER_VALUE = fiobj_str_new("LotteHTTP/0.9.0", strsizeof("LotteHTTP/0.9.0"));
 
     http_listen("3000", NULL, .on_request = on_request, .log = 1);
     fio_start(.threads = 1);
